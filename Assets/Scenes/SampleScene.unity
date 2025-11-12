@@ -455,8 +455,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: fad5fcc9f89833b4ea87a5c6d9069aaf, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  width: 10
-  height: 10
+  width: 50
+  height: 50
+  roadInterval: 10
+  roadWidth: 4
+  maxHeight: 15
+  cube: {fileID: 8151147800266357866, guid: d190880eccbaf204ba8da31e0f5d4be0, type: 3}
 --- !u!4 &1702763919
 Transform:
   m_ObjectHideFlags: 0
@@ -466,7 +470,7 @@ Transform:
   m_GameObject: {fileID: 1702763917}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -6.845702, y: -3.3418565, z: -1.1276929}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
