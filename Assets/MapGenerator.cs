@@ -1,20 +1,46 @@
-﻿using UnityEngine;
-using UnityEngine.InputSystem;
+﻿using TMPro;
 using UnityEditor;
+using UnityEngine;
+using UnityEngine.InputSystem;
 
 public class MapGenerator : MonoBehaviour
 {
+    public enum MapSettingValue
+    {
+        Width,
+        Height,
+        RoadIntervals,
+        CameraZoom
+    }
+
+    private MapSettingValue currentValue;
+
     [Header("City Settings")]
-    [Range(30,100)]
+
+    [Range(30, 100)]
     public int width = 50;
+
     [Range(30, 100)]
     public int height = 50;
+
     private int roadWidth = 2;
+
     [Range(10, 20)]
-    public int roadInterval = 10;
+    public int roadInterval = 10; //For building plot size
+
     [Header("Prefabs")]
     public GameObject cube;
     private int[,] map; // 0 = road 1 = building plot
+
+    [Header("Camera Settings")]
+    [Range(.5f, 5f)]
+    public float zoom = 1;
+    public GameObject Camera;
+
+    [Header("UI")]
+    public TMP_InputField inputField;
+
+    public TextMeshProUGUI widthText,heightText,intervalText,zoomText;
 
     private int road 
     {  
@@ -27,7 +53,9 @@ public class MapGenerator : MonoBehaviour
 
     void Start()
     {
+        inputField.onEndEdit.AddListener(InputField);
         GenerateCity();
+        SetUIValues();
     }
 
     void Update()
@@ -36,6 +64,7 @@ public class MapGenerator : MonoBehaviour
         {
             GenerateCity();
         }
+        SetCam();
     }
 
     public void GenerateCity()
@@ -73,14 +102,12 @@ public class MapGenerator : MonoBehaviour
     /// </summary>
     void FillMap()
     {
-        int halfRoadWidth = roadWidth / 2;
-
         for (int x = 0; x < width; x++)
         {
             for (int y = 0; y < height; y++)
             {
                 // Making my borders roads
-                if (x == halfRoadWidth || y == halfRoadWidth || x == (width - halfRoadWidth) || y == (height - halfRoadWidth))
+                if (x == roadWidth || y == roadWidth || x == (width - roadWidth) || y == (height - roadWidth))
                 {
                     MarkRoad(x, y);
                 }
@@ -175,7 +202,9 @@ public class MapGenerator : MonoBehaviour
         road.transform.localScale = Vector3.one;
         road.name = "Road";
     }
-
+    /// <summary>
+    /// Destroys all the children from this object
+    /// </summary>
     void DestroyCity()
     {
         if (transform.childCount > 0)
@@ -190,5 +219,65 @@ public class MapGenerator : MonoBehaviour
     bool InMapRange(int x, int y)
     {
         return x >= 0 && x < width && y >= 0 && y < height;
+    }
+
+    public void WidthSelected()
+    {
+        currentValue = MapSettingValue.Width;
+    }
+    public void HeightSelected()
+    {
+        currentValue = MapSettingValue.Height;
+    }
+    public void IntervalsSelected()
+    {
+        currentValue = MapSettingValue.RoadIntervals;
+    }
+
+    public void ZoomSelected()
+    {
+        currentValue = MapSettingValue.CameraZoom;
+    }
+    void SetUIValues()
+    {
+        widthText.text = $"Width: {width}";
+        heightText.text = $"Height: {height}";
+        intervalText.text = $"Build plot size: {roadInterval}";
+        zoomText.text = $"Camera Zoom: {zoom}";
+    }
+    void InputField(string input)
+    {
+        if (float.TryParse(input, out float value))
+        {
+            switch (currentValue)
+            {
+                case MapSettingValue.Width:
+                    width = (int)value;
+                    break;
+                case MapSettingValue.Height:
+                    height = (int)value;
+                    break;
+                case MapSettingValue.RoadIntervals:
+                    roadInterval = (int)value;
+                    break;
+                case MapSettingValue.CameraZoom:
+                    zoom = value;
+                    break;
+            }
+            SetUIValues();
+            GenerateCity();
+        }
+    }
+    void SetCam()
+    {
+        float xCenter = width / 2f;
+        float yCenter = height / 2f;
+
+        Vector3 center = new Vector3(xCenter, 0, yCenter);
+
+        float distance = Mathf.Max(width, height) * zoom;
+
+        Camera.transform.position = new Vector3(center.x, distance, center.z - distance);
+        Camera.transform.LookAt(center);
     }
 }
